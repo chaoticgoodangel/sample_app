@@ -1,0 +1,46 @@
+orange:
+  content: "I just ate an orange!"
+  created_at: <%= 10.minutes.ago %>
+  user: angel
+
+lolol:
+  content: "pi forever"
+  created_at: <%= 3.years.ago %>
+  user: angel
+
+cat_video:
+  content: "Sad cats are sad: https://youtu.be/PKffm2uI4dk"
+  created_at: <%= 2.hours.ago %>
+  user: angel
+
+most_recent:
+  content: "Writing a short test"
+  created_at: <%= Time.zone.now %>
+  user: angel
+
+<% 30.times do |n| %>
+micropost_<%= n %>:
+  content: <%= Faker::Lorem.sentence(word_count: 5) %>
+  created_at: <%= 42.days.ago %>
+  user: angel
+<% end %>
+
+fact:
+  content: "There is nothing more deceptive than an obvious fact."
+  created_at: <%= 2.years.ago %>
+  user: holmes
+
+impossible:
+  content: "If you've eliminated the impossible whatever left is the truth or whatever"
+  created_at: <%= 3.days.ago %>
+  user: holmes
+
+shock:
+  content: "O:"
+  created_at: <%= 10.minutes.ago %>
+  user: watson
+
+book:
+  content: "Does anyone want to buy my book? Mystery of the Rude Roommate"
+  created_at: <%= 4.hours.ago %>
+  user: watson
