@@ -84,16 +84,40 @@ class UserTest < ActiveSupport::TestCase
   end
   
   test "should follow and unfollow a user" do
+    irene = users(:irene)
+    holmes  = users(:holmes)
+    assert_not irene.following?(holmes)
+    irene.follow(holmes)
+    assert irene.following?(holmes)
+    assert holmes.followers.include?(irene)
+    irene.unfollow(holmes)
+    assert_not irene.following?(holmes)
+    # Users can't follow themselves.
+    irene.follow(irene)
+    assert_not irene.following?(irene)
+  end
+  
+    test "feed should have the right posts" do
     angel = users(:angel)
     holmes  = users(:holmes)
-    assert_not angel.following?(holmes)
-    angel.follow(holmes)
-    assert angel.following?(holmes)
-    assert holmes.followers.include?(angel)
-    angel.unfollow(holmes)
-    assert_not angel.following?(holmes)
-    # Users can't follow themselves.
-    angel.follow(angel)
-    assert_not angel.following?(angel)
+    irene    = users(:irene)
+    # Posts from followed user
+    irene.microposts.each do |post_following|
+      assert angel.feed.include?(post_following)
+    end
+    # Self-posts for user with followers
+    angel.microposts.each do |post_self|
+      assert angel.feed.include?(post_self)
+      assert_equal angel.feed.distinct, angel.feed
+    end
+    # Self-posts for user with no followers
+    irene.microposts.each do |post_self|
+      assert irene.feed.include?(post_self)
+    end
+    # Posts from unfollowed user
+    angel.unfollow(holmes) if angel.following?(holmes)
+    holmes.microposts.each do |post_unfollowed|
+      assert_not angel.feed.include?(post_unfollowed)
+    end
   end
 end

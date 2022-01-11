@@ -41,7 +41,6 @@ class User < ApplicationRecord
   def session_token
     remember_digest || remember
   end
-
   
   def forget
     update_attribute(:remember_digest, nil)
@@ -80,23 +79,23 @@ class User < ApplicationRecord
     reset_sent_at < 2.hours.ago
   end
   
-  # Defined a proto-feed.
-  # See "Following users" for the full implementation"
+  # Returns a user's status feed.
   def feed
-    Micropost.where("user_id = ?", id)
+    part_of_feed = "relationships.follower_id = :id or microposts.user_id = :id"
+    Micropost.left_outer_joins(user: :followers)
+             .where(part_of_feed, { id: id }).distinct
+             .includes(:user, image_attachment: :blob)
   end
   
   # Follows a user
   def follow(other_user)
     following << other_user unless self == other_user
   end
-
   
   # Unfollows a user
   def unfollow(other_user)
     following.delete(other_user)
   end
-
   
   # Returns true is the current user is following the other user.
   def following?(other_user)

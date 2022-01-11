@@ -1,1 +1,15 @@
-# empty
+one:
+  follower: angel
+  followed: holmes
+
+two:
+  follower: angel
+  followed: watson
+
+three:
+  follower: holmes
+  followed: angel
+
+four:
+  follower: irene
+  followed: angel
