@@ -1,0 +1,77 @@
+<%= javascript_pack_tag 'connect_four'%>
+
+<% provide(:title, "Connect Four") %>
+
+<h1>Connect Four</h1>
+
+<div id="game_container">
+  <div id="game_board">
+    <div class="header square" id="H1">1</div>
+    <div class="header square" id="H2">2</div>
+    <div class="header square" id="H3">3</div>
+    <div class="header square" id="H4">4</div>
+    <div class="header square" id="H5">5</div>
+    <div class="header square" id="H6">6</div>
+    <div class="header square" id="H7">7</div>
+
+    
+    <div class="col1 square" id="A1"></div>
+    <div class="col2 square" id="A2"></div>
+    <div class="col3 square" id="A3"></div>
+    <div class="col4 square" id="A4"></div>
+    <div class="col5 square" id="A5"></div>
+    <div class="col6 square" id="A6"></div>
+    <div class="col7 square" id="A7"></div>
+    
+    <div class="col1 square" id="B1"></div>
+    <div class="col2 square" id="B2"></div>
+    <div class="col3 square" id="B3"></div>
+    <div class="col4 square" id="B4"></div>
+    <div class="col5 square" id="B5"></div>
+    <div class="col6 square" id="B6"></div>
+    <div class="col7 square" id="B7"></div>
+    
+    <div class="col1 square" id="C1"></div>
+    <div class="col2 square" id="C2"></div>
+    <div class="col3 square" id="C3"></div>
+    <div class="col4 square" id="C4"></div>
+    <div class="col5 square" id="C5"></div>
+    <div class="col6 square" id="C6"></div>
+    <div class="col7 square" id="C7"></div>
+    
+    <div class="col1 square" id="D1"></div>
+    <div class="col2 square" id="D2"></div>
+    <div class="col3 square" id="D3"></div>
+    <div class="col4 square" id="D4"></div>
+    <div class="col5 square" id="D5"></div>
+    <div class="col6 square" id="D6"></div>
+    <div class="col7 square" id="D7"></div>
+    
+    <div class="col1 square" id="E1"></div>
+    <div class="col2 square" id="E2"></div>
+    <div class="col3 square" id="E3"></div>
+    <div class="col4 square" id="E4"></div>
+    <div class="col5 square" id="E5"></div>
+    <div class="col6 square" id="E6"></div>
+    <div class="col7 square" id="E7"></div>
+    
+    <div class="col1 square" id="F1"></div>
+    <div class="col2 square" id="F2"></div>
+    <div class="col3 square" id="F3"></div>
+    <div class="col4 square" id="F4"></div>
+    <div class="col5 square" id="F5"></div>
+    <div class="col6 square" id="F6"></div>
+    <div class="col7 square" id="F7"></div>
+  </div>
+  
+  <div id="rules">
+    <h2>Rules</h2>
+    <p>To play the game, click which column you would like to place your token in.</p>
+  </div>
+  
+  <div id="notifications">
+    <h2>Turn</h2>
+    <p id="turn">It is Player X's turn!</p>
+    <button type="reset" id="game_over">Play again?</button>
+  </div>
+</div>
