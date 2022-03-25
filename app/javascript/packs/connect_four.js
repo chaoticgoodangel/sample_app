@@ -46,9 +46,9 @@ function getTurn() {
   return xTurn ? "X" : "O";
 }
 
-function changeTurn() {
-  xTurn = !xTurn;
-  document.getElementById('turn').innerHTML = `It is Player ${getTurn()}'s turn!`;
+function changeTurn(player=null) {
+  xTurn = player ? xTurn : xTurn = !xTurn;
+  document.getElementById('turn').innerHTML = `It is Player ${player ? player : getTurn()}'s turn!`;
 }
 
 function setNotice(notice) {
@@ -121,12 +121,17 @@ function clearBoard() {
     for (const row of rows) {
       setValue(row, col, '');
     }
+    fullColumns = [];
+    xTurn = true;
+    document.getElementById('clear').innerHTML = "Reset board?";
+    document.getElementById('turn').innerHTML = `It is Player ${getTurn()}'s turn!`;
+    changeTurn("X");
   }
 }
 
 function celebrate() {
   setNotice(`Whoo! Player ${getTurn()} has won the game!`);
-  document.getElementById('game_over').style.setProperty('display', 'block');
+  document.getElementById('clear').innerHTML = "Play again?";
 }
 
 document.addEventListener('turbolinks:load', () => {
@@ -136,6 +141,10 @@ document.addEventListener('turbolinks:load', () => {
     }));
     
     document.getElementById('game_over').addEventListener('click', (event) => {
+        clearBoard()
+    });
+    
+    document.getElementById('clear').addEventListener('click', (event) => {
         clearBoard()
     });
 });

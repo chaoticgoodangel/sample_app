@@ -309,15 +309,16 @@ span.image {
 
 /* Connect Four */
 #game_container {
-  height: 350px;
+  max-width: 900px;
   display: grid;
-  grid-gap: 50px;
+  grid-column-gap: 50px;
+  grid-row-gap: 10px;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr .25fr;
   grid-template-areas:
     "game turn"
-    "game turn"
-    "game rules";
+    "game rules"
+    "reset empty";
   align-items: center;
   justify-items: center;
   
@@ -348,18 +349,50 @@ span.image {
     }
   }
   
+  #clear {
+    grid-area: reset;
+  }
+  
   #rules {
     grid-area: rules;
-    width: 75%;
+    max-width: 350px;
     text-align: justify;
   }
   
   #notifications {
+    max-width: 350px;
     grid-area: turn;
     text-align: center;
+    align-items: center;
     
     #game_over {
       display: none;
+    }
+  }
+  
+  @media (max-width: 600px) {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    
+    h2 {
+      margin: 10px auto 10px auto;
+    }
+    
+    #notifications {
+      order: 1;
+    }
+    
+    #game_board {
+      order: 2;
+    }
+    
+    #clear {
+      order: 3;
+    }
+    
+    #rules {
+      order: 4;
     }
   }
 }
