@@ -364,10 +364,6 @@ span.image {
     grid-area: turn;
     text-align: center;
     align-items: center;
-    
-    #game_over {
-      display: none;
-    }
   }
   
   @media (max-width: 600px) {

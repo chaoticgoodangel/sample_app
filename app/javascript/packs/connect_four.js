@@ -140,10 +140,6 @@ document.addEventListener('turbolinks:load', () => {
       placeToken(el.id)
     }));
     
-    document.getElementById('game_over').addEventListener('click', (event) => {
-        clearBoard()
-    });
-    
     document.getElementById('clear').addEventListener('click', (event) => {
         clearBoard()
     });
