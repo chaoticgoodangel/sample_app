@@ -1,5 +1,3 @@
-require 'pry-byebug'
-
 class SpaceAgency
   attr_accessor :coordinates, :destination, :speed
 
