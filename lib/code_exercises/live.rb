@@ -49,23 +49,17 @@ class Rover
 end
 
 class Game
-MENU = 
-"Command the robot with:
-  L - turn left
-  R - turn right
-  M - move forward
-  ? - this message
-  Q - quit"
+@@menu = "Command the robot with:\n  L - turn left\n  R - turn right\n  
+  M - move forward\n  ? - this message\n  Q - quit"
 
-INIT_MSG = 
-"Hello! Robot coming online.\n#{MENU}"
+@@init_msg = "Hello! Robot coming online.\n#{@@menu}"
 
   def initialize
     @rover = nil
   end
 
   def begin_game
-    puts begin_game_msg
+    puts @@init_msg
     @rover = Rover.new
     continue = true
     while continue
@@ -83,25 +77,18 @@ INIT_MSG =
         @rover.move_forward
         rover_update
       when "?"
-        MENU
+        @@menu
       when "q"
         continue = false
         "Robot shutting down."
       else
-        "Invalid key. Please try again.\n#{MENU}"
+        "Invalid key. Please try again.\n#{@@menu}"
       end
       puts display_msg
     end
-  end
-
-  def begin_game_msg
-    return INIT_MSG
   end
 
   def rover_update
     "Robot at (#{@rover.coordinates[0]}, #{@rover.coordinates[1]}) facing #{@rover.get_heading}"
   end
 end
-
-# game = Game.new
-# game.begin_game
