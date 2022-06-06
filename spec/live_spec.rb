@@ -42,13 +42,22 @@ RSpec.describe Rover do
     end
 
     describe "move_forward" do
-      
+      # case @heading
+      # when 1
+      #   @coordinates[1] += 1
+      # when 2
+      #   @coordinates[0] += 1
+      # when 3
+      #   @coordinates[1] -= 1
+      # when 4
+      #   @coordinates[0] -= 1
+      # end
+      context "when"
     end
   end
 end
 
 RSpec.describe Game do
   it "will display the initial message" do
-    expect (subject.begin_game_msg).to eq(INIT_MSG)
   end
 end
