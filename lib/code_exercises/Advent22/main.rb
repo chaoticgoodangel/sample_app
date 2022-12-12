@@ -223,14 +223,17 @@ class Day7
   def initialize
     @lines = data('day7')
     @location = []
-    @file_structure = { '/' => {} }
+    @file_structure = { '/' => { files: 0 } }
     parse_input
+    calc_size(file_structure)
   end
 
   def part_a
-    calc_size(file_structure)
-    # puts file_structure
-    
+    file_structure.to_s.split("files=>")[1..].map(&:to_i).sum{|n| n <= 100000 ? n : 0 }
+  end
+
+  def part_b
+    find_smallest_valid_dir(file_structure["/"][:files] - 40000000)
   end
 
   private
@@ -238,7 +241,6 @@ class Day7
 
   def parse_input
     lines.each do |line|
-      # puts "#{line} | loc: #{location}"
       line = line.split(' ')
       case line[0]
       when '$'
@@ -246,26 +248,65 @@ class Day7
           line[2] == '..' ? location.pop : location.push(line[2])
         end
       when 'dir'
-        file_structure.dig(*location)[line[1]] = {}
+        file_structure.dig(*location)[line[1]] = { files: 0 }
       else
-        file_structure.dig(*location)[:files] ||= 0
         file_structure.dig(*location)[:files] += line[0].to_i
       end
     end
-    # puts file_structure
-    # puts "---------------"
   end
 
   def calc_size(dir)
     dir.each do |name, value|
       unless name == :files
-        file_size = calc_size(value)
-        dir[:files] += file_size unless dir.keys.size == 1 || dir.keys.first == '/'
+        file_size = calc_size(value) || 0
+        dir[:files] += file_size unless !dir[:files] || dir.keys.size == 1 || dir.keys.first == '/'
       end
     end
-    # puts "end calc_size for #{dir}: #{dir[:files]}"
     dir[:files]
+  end
+
+  def find_smallest_valid_dir(space_needed)
+    opts = [file_structure["/"]]
+    min = file_structure["/"][:files]
+    while opts.length > 0
+      opt = opts.pop
+      min = opt[:files] if opt[:files] < min
+      opt.each_key do |k|
+        next if k == :files
+        opts.push(opt[k]) if opt[k][:files] >= space_needed
+      end
+    end
+    min
   end
 end
 
-Day7.new.part_a
+class Day8
+  def initialize
+    @lines = data('day8')
+    @visible = Array.new(data[0].length, Array.new(data.length, false))
+
+  end
+
+  def part_a
+    @lines.each_with_index do |row, row_idx|
+      row.each_with_index do |tree, col_idx|
+        check_visibility(row, col)
+      end
+    end
+  end
+
+  def part_b
+  end
+
+  def get_visibility(row, col)
+    return true if row == 0 ||
+      col == 0 ||
+      row == @lines[0].length-1 ||
+      col =  @lines.length-1
+  end
+
+end
+
+
+
+puts Day7.new.part_b
