@@ -283,30 +283,121 @@ end
 class Day8
   def initialize
     @lines = data('day8')
-    @visible = Array.new(data[0].length, Array.new(data.length, false))
-
+    @num_rows = @lines.length
+    @num_cols = @lines[0].length
+    @num_visible = (@num_rows + @num_cols - 2) * 2
+    @visible = []
+    1.upto(num_rows) {|row| @visible.push( Array.new(num_cols,(row == 1 || row == num_rows) ? true : nil))}
   end
 
   def part_a
-    @lines.each_with_index do |row, row_idx|
-      row.each_with_index do |tree, col_idx|
-        check_visibility(row, col)
+    def left_right
+      1.upto(num_rows - 2) do |row_idx|
+        left_tallest = @lines[row_idx][0]
+        right_tallest = @lines[row_idx][-1]
+        @visible[row_idx][0] = true
+        @visible[row_idx][-1] = true
+        1.upto(num_cols - 1) do |col_offset|
+          left_val = @lines[row_idx][col_offset]
+          if left_val > left_tallest
+            # puts "Left - [#{row_idx},#{col_offset}] Val: #{left_val} Tallest: #{left_tallest}"
+            left_tallest = left_val
+            unless @visible[row_idx][col_offset]
+              @visible[row_idx][col_offset] = true
+              @num_visible += 1
+            end  
+          end
+  
+          right_val = @lines[row_idx][-col_offset]
+          if right_val > right_tallest
+            # puts "Right - [#{row_idx},-#{col_offset}] Val: #{right_val} Tallest: #{right_tallest}"
+            right_tallest = right_val
+            unless @visible[row_idx][-col_offset]
+              @visible[row_idx][-col_offset] = true
+              @num_visible += 1
+            end
+          end
+        end
+        # puts "End of row #{row_idx} l<>r loop. Visible: #{@visible[row_idx].to_s}"
       end
     end
+  
+    def up_down
+      1.upto(num_cols - 2) do |col_idx|
+        up_tallest = @lines[0][col_idx]
+        down_tallest = @lines[-1][col_idx]
+        1.upto(num_rows - 1) do |row_offset|
+          up_val = @lines[row_offset][col_idx]
+          if up_val > up_tallest
+            up_tallest = up_val
+            unless @visible[row_offset][col_idx]
+              @visible[row_offset][col_idx] = true
+              @num_visible += 1
+            end
+          end
+          down_val = @lines[-row_offset][col_idx]
+          if down_val > down_tallest
+            down_tallest = down_val
+            unless @visible[-row_offset][col_idx]
+              @visible[-row_offset][col_idx] = true
+              @num_visible += 1
+            end
+          end
+        end
+        # col = ""
+        # @visible.each {|row| col += " #{row[col_idx] || 'nil '}"}
+        # puts "End of col #{col_idx} u<>d loop. Visible: #{col}"
+      end
+    end
+
+    left_right
+    up_down
+    @num_visible
   end
 
   def part_b
+    max_view = 0
+    1.upto(num_rows-2) do |row_idx|
+      1.upto(num_cols-2) do |col_idx|
+        tree_val = @lines[row_idx][col_idx]
+        left, right, up, down = true, true, true, true
+        scenic_score = 1
+        distance = 0
+        while left || right || up || down
+          distance += 1
+          if left
+            if (col_idx - distance <= 0) || (@lines[row_idx][col_idx-distance] >= tree_val)
+              left = false
+              scenic_score *= distance
+            end
+          end
+          if right
+            if (col_idx + distance >= num_cols - 1) || (@lines[row_idx][col_idx+distance] >= tree_val)
+              right = false
+              scenic_score *= distance
+            end
+          end
+          if up
+            if (row_idx - distance <= 0) || (@lines[row_idx-distance][col_idx] >= tree_val)
+              up = false
+              scenic_score *= distance
+            end
+          end
+          if down
+            if (row_idx + distance >= num_rows - 1) || (@lines[row_idx+distance][col_idx] >= tree_val)
+              down = false
+              scenic_score *= distance
+            end
+          end
+        end
+        max_view = scenic_score if scenic_score > max_view
+      end
+    end
+    max_view
   end
 
-  def get_visibility(row, col)
-    return true if row == 0 ||
-      col == 0 ||
-      row == @lines[0].length-1 ||
-      col =  @lines.length-1
-  end
-
+  private
+  attr_accessor :num_rows, :num_cols
 end
 
-
-
-puts Day7.new.part_b
+puts Day8.new.part_b
