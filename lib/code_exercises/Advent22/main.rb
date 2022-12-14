@@ -400,4 +400,145 @@ class Day8
   attr_accessor :num_rows, :num_cols
 end
 
-puts Day8.new.part_b
+module Day9
+  class Node
+    attr_accessor :location, :parent, :child
+
+    def initialize(parent=nil, child=nil, x=0, y=0)
+      @parent = parent
+      @child = child
+      @location = { x: x, y: y }
+    end
+  end
+
+  class Rope
+    attr_accessor :rope, :tail_visited
+
+    def initialize(nodes, x=0, y=0)
+      @rope = []
+      1.upto(nodes) { |i|
+        node = Node.new()
+        unless @rope.empty?
+          @rope[-1].child = node
+          node.parent = @rope[-1]
+        end
+        @rope.push(node)
+      }
+      @tail_visited = { [x, y] => true }
+    end
+
+
+    def move(node, x, y)
+      node.location[:x] += x
+      node.location[:y] += y
+      move_child = false
+
+      if node.child
+        puts "Head: #{node.location.to_s}"
+        x_diff = node.location[:x] - node.child.location[:x]
+        y_diff = node.location[:y] - node.child.location[:y]
+
+        if x_diff.abs + y_diff.abs > 2
+          puts "hello?"
+          move_child = true
+          x = x < 0 ? -1 : 1
+          y = y < 0 ? -1 : 1
+        elsif x_diff.abs > 1
+          move_child = true
+          x = x < 0 ? -1 : 1
+        elsif y_diff.abs > 1
+          move_child = true
+          y = y < 0 ? -1 : 1
+        end
+
+        move(node.child, x, y) if move_child
+
+      else
+        puts node.location.to_s unless @tail_visited[node.location]
+        @tail_visited[node.location] = true unless node.child
+      end
+    end
+  end
+
+  class Compiler
+    def self.run(nodes)
+      new(nodes).run
+    end
+    
+    def initialize(nodes)
+      @rope = Rope.new(nodes)
+      @head = @rope.rope[0]
+    end
+
+    def run
+      data('day9').each { |line| run_line(line) }
+      @rope.tail_visited.keys.count
+    end
+
+    def run_line(line)
+      x, y, steps = parse_instruction(line)
+      1.upto(steps) do
+        @rope.move(@head, x, y)
+      end
+    end
+
+    def parse_instruction(line)
+      instr = line.split(" ")
+      x = instr[0] == 'R' ? 1 : instr[0] == 'L' ? -1 : 0
+      y = instr[0] == 'D' ? 1 : instr[0] == 'U' ? -1 : 0
+      [x,y,instr[1].to_i]
+    end
+  end
+end
+
+# def day9_a
+#   visited = { [0,0] => true }
+#   head_loc = { x: 0, y: 0 }
+#   tail_loc = { x: 0, y: 0 }
+#   data('day9').each do |line|
+#     instruction = line.split(" ")
+#     x, y = 0, 0
+#     case instruction[0]
+#     when 'R'
+#       x = 1
+#     when 'L'
+#       x = -1
+#     when 'U'
+#       y = -1
+#     when 'D'
+#       y = 1
+#     end
+
+#     1.upto(instruction[1].to_i) do |i|
+#       head_loc[:x] += x
+#       head_loc[:y] += y
+#       # puts "Head: #{[head_loc[:x], head_loc[:y]].to_s}"
+
+#       x_diff = head_loc[:x] - tail_loc[:x]
+#       y_diff = head_loc[:y] - tail_loc[:y]
+
+#       # puts "x_diff: #{x_diff} y_diff: #{y_diff}"
+
+#       if x_diff.abs + y_diff.abs > 2
+#         # puts "?"
+#         tail_loc[:x] += x_diff / x_diff.abs
+#         tail_loc[:y] += y_diff / y_diff.abs
+#       elsif x_diff.abs > 1
+#         # puts x_diff
+#         tail_loc[:x] += 1 % x_diff
+#       elsif y_diff.abs > 1
+#         # puts y_diff
+
+#         tail_loc[:y] += 1 % y_diff
+#       end
+
+#       # puts "Tail: #{[tail_loc[:x], tail_loc[:y]].to_s}"
+#       visited[[tail_loc[:x], tail_loc[:y]]] = true
+#       # puts "-----------------------------"
+#     end
+#   end
+#   # puts visited.to_s
+#   visited.keys.count
+# end
+
+puts Day9::Compiler.run(2)
