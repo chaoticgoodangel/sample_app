@@ -626,4 +626,94 @@ module Day10
   end
 end
 
-Day10::VideoCommunicatorB.new
+module Day11
+  class Monkey
+    attr_reader :name, :div_by, :pass_true, :pass_false, :inspections
+    attr_accessor :items
+
+    def initialize(data_chunk)
+      @inspections = 0
+      @name = parse_int(data_chunk[0])
+      @items = data_chunk[1].split(": ")[1].split(", ").map(&:to_i)
+      @mod = build_operation(data_chunk[2])
+      @div_by = parse_int(data_chunk[3])
+      @pass_true = parse_int(data_chunk[4])
+      @pass_false = parse_int(data_chunk[5])
+    end
+
+    def update_worry
+      @inspections += 1
+      increase_worry / 3
+    end
+
+    private
+
+    def increase_worry
+      val = @items.first
+      @items[1] = val.send(@mod[:op], @mod[:old] ? val : @mod[:right])
+    end
+
+    def parse_int(str)
+      match = str.match(/\d+/)
+      match ? match.to_s.to_i : str
+    end
+
+    def build_operation(str)
+      str = str.split("= ")[1].split(" ")
+      {
+        op: str[1],
+        right: parse_int(str[2]),
+        old: str[2] == "old"
+      }
+    end
+  end
+
+  class MonkeyBusiness
+    attr_reader :monkeys
+
+    def initialize(rounds=20)
+      @rounds = rounds
+      @data = data("day11")
+      @monkeys = build_monkeys
+      play_game
+    end
+
+    def play_game
+      @rounds.times { play_round }
+    end
+
+    def play_round
+      @monkeys.each { |monkey| take_turn(monkey) }
+    end
+
+    def take_turn(monkey)
+      while monkey.items.length > 0
+        monkey.update_worry
+        pass_to = monkey.items.first % monkey.div_by ? monkey.pass_true : monkey.pass_false
+        @monkeys[pass_to].items.push(monkey.items.shift)
+      end
+    end
+
+    def calculate_monkey_business
+      max_inspections = @monkeys.map(&:inspections).max(2)
+      max_inspections[0] * max_inspections[1]
+    end
+
+    def build_monkeys
+      data_chunk_lines, i = 7, 0
+      data_chunks = []
+      @data.each_with_index { |line, idx|
+        case idx % data_chunk_lines
+        when 0
+          data_chunks.push([line])
+        when 1..5
+          data_chunks.last.push(line)
+        end
+      }
+      data_chunks.map { |data_chunk| Monkey.new(data_chunk)}
+    end
+  end
+end
+
+mb = Day11::MonkeyBusiness.new
+puts mb.calculate_monkey_business
