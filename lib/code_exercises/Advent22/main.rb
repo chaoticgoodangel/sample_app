@@ -489,56 +489,141 @@ module Day9
       [x,y,instr[1].to_i]
     end
   end
+
+  def old_implementation
+    visited = { [0,0] => true }
+    head_loc = { x: 0, y: 0 }
+    tail_loc = { x: 0, y: 0 }
+    data('day9').each do |line|
+      instruction = line.split(" ")
+      x, y = 0, 0
+      case instruction[0]
+      when 'R'
+        x = 1
+      when 'L'
+        x = -1
+      when 'U'
+        y = -1
+      when 'D'
+        y = 1
+      end
+
+      1.upto(instruction[1].to_i) do |i|
+        head_loc[:x] += x
+        head_loc[:y] += y
+        # puts "Head: #{[head_loc[:x], head_loc[:y]].to_s}"
+
+        x_diff = head_loc[:x] - tail_loc[:x]
+        y_diff = head_loc[:y] - tail_loc[:y]
+
+        # puts "x_diff: #{x_diff} y_diff: #{y_diff}"
+
+        if x_diff.abs + y_diff.abs > 2
+          # puts "?"
+          tail_loc[:x] += x_diff / x_diff.abs
+          tail_loc[:y] += y_diff / y_diff.abs
+        elsif x_diff.abs > 1
+          # puts x_diff
+          tail_loc[:x] += 1 % x_diff
+        elsif y_diff.abs > 1
+          # puts y_diff
+
+          tail_loc[:y] += 1 % y_diff
+        end
+
+        # puts "Tail: #{[tail_loc[:x], tail_loc[:y]].to_s}"
+        visited[[tail_loc[:x], tail_loc[:y]]] = true
+        # puts "-----------------------------"
+      end
+    end
+    # puts visited.to_s
+    visited.keys.count
+  end
 end
 
-# def day9_a
-#   visited = { [0,0] => true }
-#   head_loc = { x: 0, y: 0 }
-#   tail_loc = { x: 0, y: 0 }
-#   data('day9').each do |line|
-#     instruction = line.split(" ")
-#     x, y = 0, 0
-#     case instruction[0]
-#     when 'R'
-#       x = 1
-#     when 'L'
-#       x = -1
-#     when 'U'
-#       y = -1
-#     when 'D'
-#       y = 1
-#     end
+module Day10
+  class VideoCommunicatorA
+    attr_reader :listen_start, :listen_end, :listen_inc
 
-#     1.upto(instruction[1].to_i) do |i|
-#       head_loc[:x] += x
-#       head_loc[:y] += y
-#       # puts "Head: #{[head_loc[:x], head_loc[:y]].to_s}"
+    def initialize(listen_start: 20, listen_end: 220, listen_inc: 40)
+      @x = 1
+      @add_command = nil
+      @listen_start = listen_start
+      @listen_end = listen_end
+      @listen_inc = listen_inc
+      @signals = []
+      run
+    end
 
-#       x_diff = head_loc[:x] - tail_loc[:x]
-#       y_diff = head_loc[:y] - tail_loc[:y]
+    def run
+      commands = data("day10")
+      cycle, i = 0, 0
+      while i < commands.length
+        puts commands[i]
+        cycle += 1
+        @signals.push(signal_strength(cycle)) if listen?(cycle)
+        if commands[i].match(/addx.*/)
+          @x += @add_command.to_i
+          i += 1 if @add_command
+          @add_command = @add_command ? nil : commands[i].split(" ")[1].to_i
+        else
+          i += 1
+        end
+        puts "cycle: #{cycle} x: #{@x} i: #{i} add_command: #{@add_command}"
+      end
+    end
 
-#       # puts "x_diff: #{x_diff} y_diff: #{y_diff}"
+    def signal_sum
+      # puts @signals.to_s
+      @signals.sum
+    end
 
-#       if x_diff.abs + y_diff.abs > 2
-#         # puts "?"
-#         tail_loc[:x] += x_diff / x_diff.abs
-#         tail_loc[:y] += y_diff / y_diff.abs
-#       elsif x_diff.abs > 1
-#         # puts x_diff
-#         tail_loc[:x] += 1 % x_diff
-#       elsif y_diff.abs > 1
-#         # puts y_diff
+    def signal_strength(cycle)
+      cycle * @x
+    end
 
-#         tail_loc[:y] += 1 % y_diff
-#       end
+    def listen?(cycle)
+      (cycle <= @listen_end) &&( (cycle - @listen_start) % @listen_inc == 0)
+    end
 
-#       # puts "Tail: #{[tail_loc[:x], tail_loc[:y]].to_s}"
-#       visited[[tail_loc[:x], tail_loc[:y]]] = true
-#       # puts "-----------------------------"
-#     end
-#   end
-#   # puts visited.to_s
-#   visited.keys.count
-# end
 
-puts Day9::Compiler.run(2)
+  end
+
+  class VideoCommunicatorB
+
+    def initialize(width: 40, height: 6)
+      @width, @height = width, height
+      @x = 1
+      @add_command = nil
+      @output = Array.new(@height) { "." * @width }
+      run
+    end
+
+    def run
+      commands = data("day10")
+      cycle, i = 0, 0
+      while i < commands.length
+        set_output(cycle) if sprite_range.include? (cycle) % @width
+        cycle += 1
+        if commands[i].match(/addx.*/)
+          @x += @add_command.to_i
+          i += 1 if @add_command
+          @add_command = @add_command ? nil : commands[i].split(" ")[1].to_i
+        else
+          i += 1
+        end
+      end
+      puts @output
+    end
+
+    def set_output(pos)
+      @output[pos / @width][pos % @width] = "#"
+    end
+
+    def sprite_range
+      @x-1..@x+1
+    end
+  end
+end
+
+Day10::VideoCommunicatorB.new
