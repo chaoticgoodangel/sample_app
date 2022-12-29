@@ -626,13 +626,14 @@ module Day10
   end
 end
 
-module Day11
+module Day11Part1
   class Monkey
-    attr_reader :name, :div_by, :pass_true, :pass_false, :inspections
+    attr_reader :name, :div_by, :pass_true, :pass_false, :inspections, :mod
     attr_accessor :items
 
-    def initialize(data_chunk)
+    def initialize(data_chunk, decrease_worry=3)
       @inspections = 0
+      @decrease_worry = decrease_worry
       @name = parse_int(data_chunk[0])
       @items = data_chunk[1].split(": ")[1].split(", ").map(&:to_i)
       @mod = build_operation(data_chunk[2])
@@ -641,16 +642,38 @@ module Day11
       @pass_false = parse_int(data_chunk[5])
     end
 
-    def update_worry
-      @inspections += 1
-      increase_worry / 3
+    def inspect_item
+      # print "      Inspecting Item #{@items.first}: "
+      item = update_worry
+      pass = pass_to(item)
+      # puts " Passed to: #{pass}"
+      {
+        item_passed: item,
+        pass_to: pass
+      }
+    end
+
+    def print_self
+      puts m.name.to_s + ":\n  Items: " + m.items.to_s + "\n  Mod: " + m.mod.to_s
+      puts "  Div By: " + m.div_by.to_s + "\n  Pass True: " + m.pass_true.to_s
+      puts "  Pass False: " + m.pass_false.to_s
     end
 
     private
 
-    def increase_worry
-      val = @items.first
-      @items[1] = val.send(@mod[:op], @mod[:old] ? val : @mod[:right])
+    def update_worry
+      @inspections += 1
+      increased = increase_worry(@items.shift)
+      # print "Worry ^:#{increased} & v: #{increased/3}"
+      increased / @decrease_worry
+    end
+
+    def increase_worry(item)
+      item.send(@mod[:op], @mod[:old] ? item : @mod[:right])
+    end
+
+    def pass_to(item)
+      item % @div_by == 0 ? @pass_true : @pass_false
     end
 
     def parse_int(str)
@@ -671,30 +694,37 @@ module Day11
   class MonkeyBusiness
     attr_reader :monkeys
 
-    def initialize(rounds=20)
+    def initialize(rounds: 20, decrease_worry: 3)
       @rounds = rounds
+      @decrease_worry = decrease_worry
       @data = data("day11")
       @monkeys = build_monkeys
       play_game
     end
 
     def play_game
-      @rounds.times { play_round }
+      @rounds.times { |round|
+        puts "Round ##{round}" if round % 50 == 0
+        play_round
+      }
     end
 
     def play_round
+      # puts "Total items: #{@monkeys.map { |m| m.items.length }.sum}"
       @monkeys.each { |monkey| take_turn(monkey) }
     end
 
     def take_turn(monkey)
+      # puts "  Monkey ##{monkey.name}"
       while monkey.items.length > 0
-        monkey.update_worry
-        pass_to = monkey.items.first % monkey.div_by ? monkey.pass_true : monkey.pass_false
-        @monkeys[pass_to].items.push(monkey.items.shift)
+        inspection = monkey.inspect_item
+        @monkeys[inspection[:pass_to]].items.push(inspection[:item_passed])
       end
     end
 
     def calculate_monkey_business
+      puts "Inspections: "
+      @monkeys.each { |m| puts "  Monkey #{m.name}: #{m.inspections}"}
       max_inspections = @monkeys.map(&:inspections).max(2)
       max_inspections[0] * max_inspections[1]
     end
@@ -710,10 +740,10 @@ module Day11
           data_chunks.last.push(line)
         end
       }
-      data_chunks.map { |data_chunk| Monkey.new(data_chunk)}
+      data_chunks.map { |data_chunk| Monkey.new(data_chunk, @decrease_worry)}
     end
   end
 end
 
-mb = Day11::MonkeyBusiness.new
+mb = Day11Part1::MonkeyBusiness.new(rounds: 10000, decrease_worry: 1)
 puts mb.calculate_monkey_business
