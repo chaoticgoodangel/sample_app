@@ -745,5 +745,126 @@ module Day11Part1
   end
 end
 
-mb = Day11Part1::MonkeyBusiness.new(rounds: 10000, decrease_worry: 1)
+module Day11Part2
+  class Monkey
+    attr_reader :name, :div_by, :pass_true, :pass_false, :inspections, :mod
+    attr_accessor :items
+
+    def initialize(data_chunk)
+      @inspections = 0
+      @name = parse_int(data_chunk[0])
+      @items = data_chunk[1].split(": ")[1].split(", ").map(&:to_i)
+      @mod = build_operation(data_chunk[2])
+      @div_by = parse_int(data_chunk[3])
+      @pass_true = parse_int(data_chunk[4])
+      @pass_false = parse_int(data_chunk[5])
+    end
+
+    def inspect_item
+      # print "      Inspecting Item #{@items.first}: "
+      item = update_worry
+      pass = pass_to(item)
+      # puts " Passed to: #{pass}"
+      {
+        item_passed: item,
+        pass_to: pass
+      }
+    end
+
+    def print_self
+      puts m.name.to_s + ":\n  Items: " + m.items.to_s + "\n  Mod: " + m.mod.to_s
+      puts "  Div By: " + m.div_by.to_s + "\n  Pass True: " + m.pass_true.to_s
+      puts "  Pass False: " + m.pass_false.to_s
+    end
+
+    private
+
+    def update_worry
+      @inspections += 1
+      increase_worry(@items.shift)
+    end
+
+    def increase_worry(item)
+      item.send(@mod[:op], @mod[:old] ? item : @mod[:right])
+    end
+
+    def pass_to(item)
+      item % @div_by == 0 ? @pass_true : @pass_false
+    end
+
+    def parse_int(str)
+      match = str.match(/\d+/)
+      match ? match.to_s.to_i : str
+    end
+
+    def build_operation(str)
+      str = str.split("= ")[1].split(" ")
+      {
+        op: str[1],
+        right: parse_int(str[2]),
+        old: str[2] == "old"
+      }
+    end
+  end
+
+  class MonkeyBusiness
+    attr_reader :monkeys
+
+    def initialize(rounds: 20)
+      @rounds = rounds
+      @data = data("day11")
+      @monkeys = build_monkeys
+      @mult_num = find_common_number
+      play_game
+    end
+
+    def play_game
+      @rounds.times { |round|
+        play_round
+      }
+    end
+
+    def play_round
+      # puts "Total items: #{@monkeys.map { |m| m.items.length }.sum}"
+      @monkeys.each { |monkey| take_turn(monkey) }
+    end
+
+    def take_turn(monkey)
+      # puts "  Monkey ##{monkey.name}"
+      while monkey.items.length > 0
+        inspection = monkey.inspect_item
+        @monkeys[inspection[:pass_to]].items.push(inspection[:item_passed] % @mult_num)
+      end
+    end
+
+    def calculate_monkey_business
+      puts "Inspections: "
+      @monkeys.each { |m| puts "  Monkey #{m.name}: #{m.inspections}"}
+      max_inspections = @monkeys.map(&:inspections).max(2)
+      max_inspections[0] * max_inspections[1]
+    end
+
+    def build_monkeys
+      data_chunk_lines, i = 7, 0
+      data_chunks = []
+      @data.each_with_index { |line, idx|
+        case idx % data_chunk_lines
+        when 0
+          data_chunks.push([line])
+        when 1..5
+          data_chunks.last.push(line)
+        end
+      }
+      data_chunks.map { |data_chunk| Monkey.new(data_chunk)}
+    end
+
+    def find_common_number
+      max_num = 1
+      @monkeys.each { |m| max_num *= m.div_by }
+      max_num
+    end
+  end
+end
+
+mb = Day11Part2::MonkeyBusiness.new(rounds: 10000)
 puts mb.calculate_monkey_business
