@@ -866,5 +866,87 @@ module Day11Part2
   end
 end
 
-mb = Day11Part2::MonkeyBusiness.new(rounds: 10000)
-puts mb.calculate_monkey_business
+def day13_a
+  data = data('day13')
+  idx = 0
+  correct_idx_sum = 0
+  while idx < data.length do
+    correct_idx_sum += idx/3 if correct_order?(data[idx], data[idx+1])
+    idx += 3
+  end
+  correct_idx_sum
+end
+
+
+def correct_order?(left, right)
+  puts "Left: #{left} Right: #{right}"
+  # if left.is_a?(Integer) && right.is_a?(Integer)
+  #   if l < r
+  #     return true
+  #   elsif l > r
+  #     return false
+  #   else
+  #     return "continue"
+  #   end
+  # end
+
+  while true
+    l, r = left.shift, right.shift
+    puts "Comparing #{l} and #{r}"
+    if l.nil? || r.nil?
+      return "continue" if l.nil? && r.nil?
+      return true if l.nil?
+      return false if r.nil?
+    end
+    if l.is_a?(Integer) && r.is_a?(Integer)
+      if l < r
+        return true
+      elsif l > r
+        return false
+      # else
+      #   return "continue"
+      end
+    else
+      res = correct_order?(int_to_arr(l),int_to_arr(r))
+      return res unless res == "continue"
+    end
+  end
+  return "continue"
+end
+
+def int_to_arr(val)
+  val.is_a?(Integer) ? [val] : val
+end
+
+# # puts day13_a
+# left = [[1],[2,3,4]]
+# right = [[1],4]
+# puts correct_order?(left, right)
+
+# left = [1,1,3,1,1]
+# right = [1,1,5,1,1]
+# puts correct_order?(left, right)
+
+# left = [9]
+# right = [[8,7,6]]
+# puts correct_order?(left, right)
+
+# left = [[4,4],4,4]
+# right = [[4,4],4,4,4]
+# puts correct_order?(left, right)
+
+# left = [7,7,7,7]
+# right = [7,7,7]
+# puts correct_order?(left, right)
+
+# left = []
+# right = [3]
+# puts correct_order?(left, right)
+
+# left = [[[]]]
+# right = [[]]
+# # puts correct_order?(left, right)
+
+# left = [1,[2,[3,[4,[5,6,7]]]],8,9]
+# right = [1,[2,[3,[4,[5,6,0]]]],8,9]
+# puts correct_order?(left, right)
